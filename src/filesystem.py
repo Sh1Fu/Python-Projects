@@ -6,6 +6,15 @@ import struct
 
 
 class FileSystem(object):
+    '''
+    Windows File System class. There are some funcitons in it:\n
+    ``create``: file_create,
+    ``delete``: file_delete,
+    ``rename``: file_rename,
+    ``write``: file_write,
+    ``read``: file_read,
+    ``copy``: file_copy
+    '''
     def __init__(self, filename: str) -> None:
         self.filename = filename
         self.commands = {
@@ -18,11 +27,17 @@ class FileSystem(object):
         }
 
     def file_write(self) -> None:
+        '''
+        Write input buffer to file
+        '''
         new_data = input("Print string to file: ")
         with open(self.filename, "a") as f:
             f.write(new_data)
 
     def file_delete(self) -> None:
+        '''
+        Delete file by file name
+        '''
         try:
             os.remove(self.filename)
             print("File deleted")
@@ -30,6 +45,9 @@ class FileSystem(object):
             print("File not found error")
 
     def file_create(self) -> None:
+        '''
+        Create an empty file
+        '''
         try:
             with open(self.filename, "x") as f:
                 pass
@@ -37,6 +55,9 @@ class FileSystem(object):
             print(f"{self.filename} is already exist")
 
     def file_rename(self, new_name: str) -> None:
+        '''
+        Rename file from arguments to file with name ``new_name``
+        '''
         try:
             shutil.copyfile(self.filename, new_name)
             os.remove(self.filename)
@@ -52,6 +73,9 @@ class FileSystem(object):
             print("Permission denied.")
 
     def file_read(self) -> None:
+        '''
+        Read all data from file and print it
+        '''
         buffer = str()
         try:
             with open(self.filename, "r") as f:
@@ -65,6 +89,9 @@ class FileSystem(object):
 ===END OF FILE===\n")
 
     def file_copy(self, new_dir: str) -> None:
+        '''
+        Copy file to another directory with name ``new_dir``
+        '''
         shutil.copyfile(self.filename, f"{new_dir}/{self.filename}")
 
 
@@ -81,9 +108,15 @@ class WinReg(object):
         }
 
     def key_create(self) -> None:
+        '''
+        Create key in opened descriptor (HKLM\\SOFTWARE\\Lab1\\)
+        '''
         winreg.CreateKeyEx(self.key, self.key_name, 0, winreg.KEY_ALL_ACCESS)
 
     def key_data_add(self, new_data: str) -> None:
+        '''
+        Add data in to the key with different value types
+        '''
         try:
             key = winreg.OpenKeyEx(
                 self.key, self.key_name, 0, winreg.KEY_ALL_ACCESS)
@@ -106,17 +139,14 @@ class WinReg(object):
         winreg.SetValueEx(key, options[0], 0, key_type, data)
 
     def key_delete(self) -> None:
-        # print(winreg.EnumKey(self.key, 2))
+        '''
+        Delete key
+        '''
         winreg.DeleteKeyEx(self.key, self.key_name)
 
     def close(self) -> None:
         winreg.CloseKey(self.dir)
         winreg.CloseKey(self.key)
-
-# Мне известно про то, что
-# можно использовать атрибут action у каждого из аргументов.
-# Но тогда скорее всего либо надо избавляться от класса,
-# либо от переменной класса. А я хочу на классах :<
 
 
 def main():
