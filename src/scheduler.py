@@ -13,7 +13,7 @@ class ScheduleFindError(Exception):
         super().__init__(*args)
 
     def __str__(self) -> str:
-        return super().__str__(f'Не удалось найти расписание по параметру')
+        return 'Не удалось найти расписание по параметру. Проверьте введенное значение'
 
 
 class RequestSender:
@@ -155,10 +155,8 @@ class ParseSchedule(RequestSender):
 
 
 def main():
-    parser = arg.ArgumentParser(prog="Polytech Python Schedule",
-                                description="A Python script to parse Polytech schedule by teacher name or group id")
-    parser.add_argument(
-        "-m", type=int, help="Select mode to work: 1 - work with teacher name, 2 - parse by group id", choices=[1, 2], required=True)
+    parser = arg.ArgumentParser(prog="Polytech Python Schedule", description="A Python script to parse Polytech schedule by teacher name or group id")
+    parser.add_argument("-m", type=int, help="Select mode to work: 1 - work with teacher name, 2 - parse by group id", choices=[1, 2], required=True)
     parser.add_argument("-t", type=str, help="Teacher name")
     parser.add_argument("-g", type=str, help="University group ID")
     parser.add_argument("-d", type=str, help="The date you are interested in")
