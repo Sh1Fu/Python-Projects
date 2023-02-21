@@ -1,7 +1,9 @@
-import requests as req
-import argparse as arg
+import os
 import re
 import json
+import requests as req
+import argparse as arg
+import matplotlib.pyplot as plt
 from urllib.parse import quote
 
 
@@ -9,6 +11,7 @@ class ScheduleFindError(Exception):
     '''
     Default own Exception
     '''
+
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
@@ -18,9 +21,12 @@ class ScheduleFindError(Exception):
 
 class RequestSender:
     '''
-    A class with some functionality that allows you to find data about teachers and about the group, as well as to get the timetable by parameters in raw form
+    A class with some functionality that allows you to find data about
+    teachers and about the group, as well as to get the
+    timetable by parameters in raw form
     '''
-    def __init__(self, teacher_name: str, group_id: str, date: str) -> None:
+
+    def __init__(self, teacher_name: str, group_id: str, date: str, place: str) -> None:
         self.ENDPOINTS = {
             "group": "https://ruz.spbstu.ru/search/groups?q=",
             "teacher": "https://ruz.spbstu.ru/search/teacher?q=",
@@ -29,6 +35,7 @@ class RequestSender:
         self.teacher_name = teacher_name
         self.group_id = group_id
         self.date = date
+        self.place = place
 
     def date_format(self) -> str:
         '''
@@ -69,6 +76,12 @@ class RequestSender:
         else:
             return -1
 
+    def find_place(self) -> tuple:
+        '''
+        Optional task. Use ``api/v1/ruz/buildings`` for json
+        '''
+        pass
+
     def extract_initial_state(self, data: req.Response) -> dict:
         '''
         Extract all data from HTML response
@@ -105,8 +118,12 @@ class ParseSchedule(RequestSender):
     Standard class with custom schedule output,\n
     where there is the minimum necessary information
     '''
-    def __init__(self, mode: int, teacher_name: str, group_id: str, date: str) -> None:
-        super().__init__(teacher_name, group_id, date)
+
+    def __init__(self, args: arg.Namespace) -> None:
+        super().__init__(teacher_name=args.t,
+                         group_id=args.g,
+                         date=args.d,
+                         place=args.a)
         self.WEEKDAYS = {
             1: "Понедельник",
             2: "Вторник",
@@ -116,12 +133,14 @@ class ParseSchedule(RequestSender):
             6: "Суббота",
             7: "Воскресенье"
         }
-        self.mode = 'teacher' if mode == 1 else 'group'
+        self.mode = 'teacher' if args.m == 1 else 'group'
 
-    def print_schedule(self) -> None:
+    def print_schedule(self) -> dict:
         '''
-        Beautiful output of the schedule according to the selected mode of the script
+        Beautiful output of the schedule
+        according to the selected mode of the script
         '''
+        graph_info = dict()
         match self.mode:
             case 'teacher':
                 print(self.teacher_name)
@@ -130,40 +149,74 @@ class ParseSchedule(RequestSender):
                     print(
                         f"======== {self.WEEKDAYS[day['weekday']]} ========\n")
                     for lesson in day['lessons']:
-                        print(f"{lesson['time_start']} - {lesson['time_end']}:")
+                        try:
+                            graph_info[day['date']] += 1
+                        except KeyError:
+                            graph_info[day['date']] = 1
+                        print(
+                            f"{lesson['time_start']} - {lesson['time_end']}:")
                         print(f"    {lesson['subject']}")
                         print(f"    {lesson['typeObj']['name']}")
                         if lesson['additional_info'] == "Поток":
-                            print(f"    Поток, {lesson['groups'][0]['level']} курс {lesson['groups'][0]['faculty']['abbr']}")
+                            print(
+                                f"    Поток, {lesson['groups'][0]['level']} курс {lesson['groups'][0]['faculty']['abbr']}")
                         else:
                             print(f"    Группа {lesson['groups'][0]['name']}")
-                        print(f"    Аудитория {lesson['auditories'][0]['name']}, {lesson['auditories'][0]['building']['name']}")
+                        print(
+                            f"    Аудитория {lesson['auditories'][0]['name']}, {lesson['auditories'][0]['building']['name']}")
                     print("\n")
             case 'group':
                 print(self.group_id)
                 raw_schedule = self.get_group_schedule()
                 for day in raw_schedule:
-                    print(f"======== {self.WEEKDAYS[day['weekday']]} ========\n")
+                    print(
+                        f"======== {self.WEEKDAYS[day['weekday']]} ========\n")
                     for lesson in day['lessons']:
-                        print(f"{lesson['time_start']} - {lesson['time_end']}:")
+                        try:
+                            graph_info[day['date']] += 1
+                        except KeyError:
+                            graph_info[day['date']] = 1
+                        print(
+                            f"{lesson['time_start']} - {lesson['time_end']}:")
                         print(f"    {lesson['subject']}")
                         print(f"    {lesson['typeObj']['name']}")
                         if (lesson['teachers']):
                             print(f"    {lesson['teachers'][0]['full_name']}")
-                        print(f"    Аудитория {lesson['auditories'][0]['name']}, {lesson['auditories'][0]['building']['name']}")
+                        print(
+                            f"    Аудитория {lesson['auditories'][0]['name']}, {lesson['auditories'][0]['building']['name']}")
                     print("\n")
+        return graph_info
+
+    def draw_graph(self) -> None:
+        '''
+        Prepare data from raw schedule and draw the bar
+        thanks by modified dates and counts
+        '''
+        data = self.print_schedule()
+        count_of_subjects = list(data.values())
+        dates = [raw_date[5:] for raw_date in list(data.keys())]
+        plt.bar(dates, count_of_subjects, width=0.4)
+        plt.title(f"Количество занятий каждый день с {dates[0]}")
+        plt.autoscale(enable=True)
+        plt.xlabel("День недели")
+        plt.ylabel("Количество занятий")
+        os.makedirs('result') if not os.path.exists('result') else None
+        plt.savefig(f'result/schedule_{dates[0]}.png')
 
 
 def main():
-    parser = arg.ArgumentParser(prog="Polytech Python Schedule", description="A Python script to parse Polytech schedule by teacher name or group id")
-    parser.add_argument("-m", type=int, help="Select mode to work: 1 - work with teacher name, 2 - parse by group id", choices=[1, 2], required=True)
+    parser = arg.ArgumentParser(prog="Polytech Python Schedule",
+                                description="A Python script to parse Polytech schedule by teacher name or group id")
+    parser.add_argument(
+        "-m", type=int, help="Select mode to work: 1 - work with teacher name, 2 - parse by group id", choices=[1, 2], required=True)
     parser.add_argument("-t", type=str, help="Teacher name")
     parser.add_argument("-g", type=str, help="University group ID")
     parser.add_argument("-d", type=str, help="The date you are interested in")
+    parser.add_argument("-a", type=str, help="The number of place")
 
     args = parser.parse_args()
-    schedule = ParseSchedule(args.m, args.t, args.g, args.d)
-    schedule.print_schedule()
+    schedule = ParseSchedule(args=args)
+    schedule.draw_graph()
 
 
 if __name__ == "__main__":

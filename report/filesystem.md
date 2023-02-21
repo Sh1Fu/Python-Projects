@@ -49,17 +49,17 @@ main содержит в себе инициализацию аргументо�
 Ниже представлены скриншоты работы программы:
 
 * Вспомогательная информация при работе со скриптом
-    ![Help](media/filesystem/help.png)
+    ![Help](../media/filesystem/help.png)
 * Пример работы с файловой системой
-    ![Write](media/filesystem/file_write.png)
-    ![Delete](media/filesystem/file_delete.png)
-    ![Read](media/filesystem/file_read.png)
-    ![Rename](media/filesystem/file_rename.png)
-    ![Copy](media/filesystem/file_copy.png)
+    ![Write](../media/filesystem/file_write.png)
+    ![Delete](../media/filesystem/file_delete.png)
+    ![Read](../media/filesystem/file_read.png)
+    ![Rename](../media/filesystem/file_rename.png)
+    ![Copy](../media/filesystem/file_copy.png)
 * Пример работы с реестром
-    ![Create](media/filesystem/key_create.png)
-    ![Value](media/filesystem/set_value.png)
-    ![Delete_Key](media/filesystem/delete_key.png)
+    ![Create](../media/filesystem/key_create.png)
+    ![Value](../media/filesystem/set_value.png)
+    ![Delete_Key](../media/filesystem/delete_key.png)
 
 <center> <h2> Вывод </h2> </center>
 

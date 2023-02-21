@@ -1,2 +1,6 @@
+# Project workspace dirs
 .vscode/
 build/
+
+# Result dir
+result/
