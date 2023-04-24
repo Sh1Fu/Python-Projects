@@ -4,3 +4,11 @@ build/
 
 # Result dir
 result/
+
+# Dataset dir
+data/
+
+
+# Others
+src/__pycache__
+tmp/
