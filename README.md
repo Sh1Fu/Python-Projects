@@ -1,3 +1,5 @@
+[![Pylint](https://github.com/Sh1Fu/Python-projects/actions/workflows/pylint.yml/badge.svg?branch=main)](https://github.com/Sh1Fu/Python-projects/actions/workflows/pylint.yml)
+
 # Python-projects
 
 	This lab work is done as part of one of the subjects at my university. 
