@@ -1,10 +1,11 @@
+import argparse as arg
+import json
 import os
 import re
-import json
-import requests as req
-import argparse as arg
-import matplotlib.pyplot as plt
 from urllib.parse import quote
+
+import matplotlib.pyplot as plt
+import requests as req
 
 
 class ScheduleFindError(Exception):
@@ -16,7 +17,9 @@ class ScheduleFindError(Exception):
         super().__init__(*args)
 
     def __str__(self) -> str:
-        return 'Не удалось найти расписание по параметру. Проверьте введенное значение'
+        string = '''Не удалось найти расписание по параметру.
+Проверьте введенное значение'''
+        return string
 
 
 class RequestSender:

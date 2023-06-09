@@ -1,13 +1,16 @@
 import hashlib
 import json
+
 from botconfig import *
 from classification import ModelTrain
-
 
 USERS_DB = dict()
 
 
 def check_session(message) -> bool:
+    '''
+    Check if current user exists in database and he is sign in already.
+    '''
     try:
         return USERS_DB[message.from_user.id][1]
     except KeyError:
@@ -15,6 +18,9 @@ def check_session(message) -> bool:
 
 
 def check_passwd(message) -> None:
+    '''
+    Password verification
+    '''
     user_input = message.text
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -30,23 +36,35 @@ def check_passwd(message) -> None:
 
 @BOT.message_handler(commands=['start', 'help'])
 def send_usage(message) -> None:
+    '''
+    Basic trigger to /start and /help commands
+    '''
     BOT.reply_to(message, text=INFO_MESSAGE)
 
 
 @BOT.message_handler(commands=["register"])
 def register_user(message) -> None:
+    '''
+    Sign up process to another user.
+    '''
     BOT.reply_to(message, REGISTER_MESSAGE)
     BOT.register_next_step_handler(message, init_new_user)
 
 
 @BOT.message_handler(commands=["login"])
 def login_user(message) -> None:
+    '''
+    Login method. Update element in user's database.
+    '''
     BOT.reply_to(message, LOGIN_MESSAGE)
     BOT.register_next_step_handler(message, check_passwd)
 
 
 @BOT.message_handler(commands=['predict'])
 def image_processing(message) -> None:
+    '''
+    Predict object in sended through the message picture
+    '''
     if check_session(message):
         BOT.reply_to(message, "Send me your image :>")
         BOT.register_next_step_handler(message, predict_init)
@@ -56,6 +74,9 @@ def image_processing(message) -> None:
 
 @BOT.message_handler(commands=['logout'])
 def logout(message) -> None:
+    '''
+    Logout process.
+    '''
     BOT.reply_to(message, "Okey, have a nice day!")
     try:
         USERS_DB[message.from_user.id][1] = 0
@@ -65,6 +86,9 @@ def logout(message) -> None:
 
 
 def predict_init(message) -> None:
+    '''
+    Download object from chat and send it to model
+    '''
     BOT.reply_to(message, "Please, wait...")
     fileId = message.photo[-1].file_id
     file_info = BOT.get_file(fileId)
@@ -78,6 +102,9 @@ def predict_init(message) -> None:
 
 
 def init_new_user(message) -> None:
+    '''
+    Help function to register process
+    '''
     user_passwd = message.text
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -93,14 +120,23 @@ def init_new_user(message) -> None:
 
 
 def read_db() -> dict:
+    '''
+    Try to read all values from file with user's database.
+    '''
     database = {}
     if os.path.exists(f"{BOT_FOLDER}/user_db"):
         with open(f"{BOT_FOLDER}/user_db", 'r') as db:
-            database = json.load(db)
+            try:
+                database = json.load(db)
+            except KeyError:
+                pass
     return database
 
 
 def main() -> None:
+    '''
+    Main function
+    '''
     USERS_DB = read_db()
     print("Telegram Support Bot started...")
     BOT.polling()

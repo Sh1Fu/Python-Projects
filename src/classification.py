@@ -1,19 +1,28 @@
-import argparse as ap
+from typing import Any
+
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-from typing import Any
-from keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
-from keras.utils import load_img, img_to_array
+from keras.preprocessing.image import DirectoryIterator, ImageDataGenerator
+from keras.utils import img_to_array, load_img
 
 
 class ModelTrain:
+    '''
+    Class to train Sequential prediction model
+    '''
     def __init__(self, image_path: str) -> None:
+        '''
+        Init method with dir names
+        '''
         self.IMAGE_PATH = image_path
         self.TRAIN_DIR = "./data/train"
         self.VALID_DIR = "./data/valid"
 
     def _create_generator(self) -> tuple[DirectoryIterator]:
+        '''
+        Local method to create train and validation generators
+        '''
         train_datagen = ImageDataGenerator(rescale=1/255)
         validation_datagen = ImageDataGenerator(rescale=1/255)
 
@@ -35,6 +44,9 @@ class ModelTrain:
         return (train_generator, validation_generator)
 
     def _model_compile(self) -> tuple[tf.keras.models.Sequential, Any]:
+        '''
+        Compile trained model
+        '''
         (train_generator, validation_generator) = self._create_generator()
         model = tf.keras.models.Sequential([
             tf.keras.layers.Flatten(input_shape=(200, 200, 3)),
@@ -56,6 +68,9 @@ class ModelTrain:
         return (model, history)
 
     def predict_image(self) -> str:
+        '''
+        Send object to analyse.
+        '''
         (model, history) = self._model_compile()
         img = load_img(self.IMAGE_PATH, target_size=(200, 200))
         x = img_to_array(img)

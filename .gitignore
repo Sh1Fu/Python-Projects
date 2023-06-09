@@ -1,6 +1,7 @@
 # Project workspace dirs
 .vscode/
 build/
+venv/
 
 # Result dir
 result/

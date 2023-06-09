@@ -1,8 +1,8 @@
-import os
 import argparse
+import os
 import shutil
-import winreg
 import struct
+import winreg
 
 
 class FileSystem(object):
@@ -15,6 +15,7 @@ class FileSystem(object):
     ``read``: file_read,
     ``copy``: file_copy
     '''
+
     def __init__(self, filename: str) -> None:
         self.filename = filename
         self.commands = {

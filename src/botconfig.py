@@ -1,7 +1,9 @@
-import uuid
 import telebot
 import os
 
+'''
+Base constatnts
+'''
 SALT = "b9dd2d857993f0d2"  # Пускай остается
 INFO_MESSAGE = """
 Welcome to PythonLabs Bot.
